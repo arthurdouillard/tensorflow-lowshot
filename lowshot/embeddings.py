@@ -20,9 +20,9 @@ def convnet(input, filters, bn=True, dropout=False, reuse=tf.AUTO_REUSE,
     x = input
 
     with tf.variable_scope('convnet'):
-        for block_id, block in enumerate(filters):
+        for block_id, block_filters in enumerate(filters):
             with tf.variable_scope(f'block{str(block_id)}'):
-                x = block(x)
+                x = block(x, block_filters, bn=bn, dropout=dropout, reuse=reuse)
 
     if extract == 'flatten':
         x = tf.layers.flatten(x)
@@ -53,11 +53,11 @@ def block(x, filters, bn, dropout, reuse):
             x = tf.layers.conv2d(x, f, 3, reuse=reuse)
 
             if bn:
-                x = tf.layers.batch_normalization(x)
+                x = tf.layers.batch_normalization(x, reuse=reuse)
 
             x = tf.nn.relu(x)
 
             if dropout:
-                x = tf.layers.dropout(x, dropout)
+                x = tf.layers.dropout(x, dropout, reuse=reuse)
 
     return x
